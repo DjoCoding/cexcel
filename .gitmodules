@@ -1,0 +1,3 @@
+[submodule "djolib"]
+	path = djolib
+	url = https://github.com/DjoCoding/djolib
