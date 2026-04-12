@@ -19,12 +19,12 @@ typedef struct {
 } Excel;
 
 typedef struct {
-    size_t rows_count;
-    size_t cols_count;
+    size_t rows;
+    size_t cols;
 } ExcelStats;
 
-void excel_free(Excel *excel);
-Sheet *excel_add_sheet_from_raw(Excel *excel, char *raw_content);
-Excel *excel_new_from_allocator(Allocator *allocator);
+Excel   *excel_new_from_allocator(Allocator *allocator);
+Sheet   *excel_add_sheet_from_raw(Excel *excel, char *raw_content);
+void    excel_free(Excel *excel);
 
 #endif // EXCEL_H_

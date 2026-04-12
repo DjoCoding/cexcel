@@ -17,4 +17,8 @@ typedef struct {
     } as;
 } Cell;
 
+Cell cell_from_value(StringView value);
+Cell cell_from_formula(StringView formula);
+Cell cell_as_empty();
+
 #endif

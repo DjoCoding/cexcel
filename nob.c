@@ -2,11 +2,11 @@
 #include "nob.h"
 
 void cmd_append_flags(Cmd *cmd) {
-    nob_cmd_append(cmd, "-Wall", "-Wextra", "-Werror");
+    nob_cmd_append(cmd, "-Wall", "-Wextra", "-Werror", "-ggdb2");
 }
 
 void cmd_append_includes(Cmd *cmd) {
-    nob_cmd_append(cmd, "-I", "./djolib");
+    nob_cmd_append(cmd, "-I./clib");
 }
 
 bool add_c_files_as_src(Nob_Walk_Entry entry) {
