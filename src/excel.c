@@ -48,7 +48,7 @@ ExcelStats __int__excel_stats(Excel *excel, char *preprocessed) {
     while(sv.len != 0) {
         stats.rows += 1;
 
-        StringView line = sv_split(&sv, '\n');
+        StringView line = sv_trim(sv_split(&sv, '\n'));
         size_t     line_cols = 0;
         while(line.len != 0) {
             line_cols += 1;
@@ -94,19 +94,11 @@ Sheet *excel_add_sheet_from_raw(Excel *excel, char *raw_content) {
                 cell_sv, 
                 sv_from_cstr(EXCEL_FORMULA_PREFIX)
             )) {
-                Cell cell = cell_from_formula(cell_sv);
-                sheet_assign_cell(sheet, row, col, cell);
-                continue;
-
                 // FIXME: Parse formula here and set the cell
                 assert(false && "not implemented");
             }
 
             
-            Cell cell = cell_from_value(cell_sv);
-            sheet_assign_cell(sheet, row, col, cell);
-            continue;
-
             // FIXME: Parse value here and set the cell
             assert(false && "not implemented");
         }

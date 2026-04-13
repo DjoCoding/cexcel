@@ -3,22 +3,24 @@
 
 #include <sv.h>
 
+#include "formula.h"
+
 typedef enum {
     CELL_KIND_FORMULA,
-    CELL_KIND_VALUE,
+    CELL_KIND_LITERAL,
     CELL_KIND_EMPTY
 } CellKind;
 
 typedef struct {
     CellKind kind;
     union {
-        StringView value;
-        StringView formula;
+        Literal     literal;
+        Formula     *formula;
     } as;
 } Cell;
 
-Cell cell_from_value(StringView value);
-Cell cell_from_formula(StringView formula);
+Cell cell_from_literal(Literal literal);
+Cell cell_from_formula(Formula *formula);
 Cell cell_as_empty();
 
 #endif
