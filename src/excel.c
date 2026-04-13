@@ -21,6 +21,7 @@ Excel *excel_new_from_allocator(Allocator *allocator) {
 
     excel->allocator = allocator;
     excel->sb = sb;
+    excel->parser = parser_new();
 
     return excel;
 }
@@ -109,5 +110,6 @@ Sheet *excel_add_sheet_from_raw(Excel *excel, char *raw_content) {
 }
 
 void excel_free(Excel *excel) {
+    parser_free(excel->parser);
     return allocator_kill(excel->allocator);
 }

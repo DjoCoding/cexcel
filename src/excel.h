@@ -7,10 +7,12 @@
 #include <sb.h>
 
 #include "sheet.h"
+#include "parser.h"
 
 typedef struct {
     Allocator       *allocator;
     StringBuilder   *sb;
+    Parser          *parser;
     struct {
         Sheet       **items;
         size_t      len;
