@@ -6,10 +6,10 @@
 #include <sv.h>
 #include <allocator.h>
 
-typedef double f64;
-typedef long long int i64;
+#include "types.h"
 
 typedef enum {
+    LIT_KIND_INVALID,
     LIT_KIND_FLOAT,
     LIT_KIND_STRING,
     LIT_KIND_INT,
@@ -26,10 +26,11 @@ typedef struct {
     } as;
 } Literal;
 
+#define INVALID_LITERAL         ((Literal) {.kind = LIT_KIND_INVALID})
+
 Literal literal_init_from_string(StringView string);
 Literal literal_init_from_int(i64 value);
 Literal literal_init_from_float(f64 value);
 Literal literal_init_from_bool(bool value);
-
 
 #endif // LITERAL_H_

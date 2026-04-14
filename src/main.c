@@ -14,42 +14,47 @@
 
 #include "excel.h"
 
-char *fcontent(Allocator *allocator, char *filepath) {
+char *fcontent(char *filepath) {
     FILE *file = fopen(filepath, "r");
     if(file == NULL) {
         perror("fopen failed");
-        exit(EXIT_FAILURE);
+        return NULL;
     }
 
     if(fseek(file, 0, SEEK_END) < 0) {
         fclose(file);
         perror("fseek failed");
-        exit(EXIT_FAILURE);
+        return NULL;
     }
 
     long int size = ftell(file);
     if(size < 0) {
         fclose(file);
         perror("ftell failed");
-        exit(EXIT_FAILURE);
+        return NULL;
     }
     size_t len = (size_t)size;
 
     if(fseek(file, 0, SEEK_SET) < 0) {
         fclose(file);
         perror("fseek failed");
-        exit(EXIT_FAILURE);
+        return NULL;
     }
 
-    char *content = allocator_alloc(allocator, sizeof(char) * (len + 1));
+    char *content = malloc(sizeof(char) * (len + 1));
+    if(content == NULL) {
+        fclose(file);
+        perror("malloc failed");
+        return NULL;
+    }
     content[len] = 0;
     
     size_t n = fread(content, sizeof(char) * len, 1, file);
     if(n < 1) {
         fclose(file);
-        allocator_free(allocator, content);
+        free(content);
         perror("fread failed");
-        exit(EXIT_FAILURE);
+        return NULL;
     }
 
     fclose(file);
@@ -90,6 +95,8 @@ void usage(FILE *f) {
     (void)f;
 }
 
+#include "lexer.h"
+
 int main(int argc, char **argv) {
     Args args = args_init(argc, argv);
     args_consume(&args);
@@ -103,11 +110,16 @@ int main(int argc, char **argv) {
     Allocator *allocator = allocator_new();
 
     char *filepath = args_consume(&args);
-    char *content = fcontent(allocator, filepath);
+    
+    char *content = fcontent(filepath);
+    if(content == NULL) {
+        return 1;
+    }
 
-    Excel *excel = excel_new_from_allocator(allocator);
+    Excel *excel = excel_new();
     excel_add_sheet_from_raw(excel, content);
     excel_free(excel);
-    
+
+    allocator_kill(allocator);
     return 0;
 }

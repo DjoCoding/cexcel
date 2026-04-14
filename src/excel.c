@@ -13,7 +13,8 @@ char *__int__excel_preprocess(Excel *excel, char *content);
 ExcelStats __int__excel_stats(Excel *excel, char *preprocessed);
 
 
-Excel *excel_new_from_allocator(Allocator *allocator) {
+Excel *excel_new() {
+    Allocator *allocator = allocator_new();
     StringBuilder  *sb = sb_new_from_allocator(allocator);
     
     Excel *excel = allocator_alloc(allocator, sizeof(*excel));
@@ -21,7 +22,8 @@ Excel *excel_new_from_allocator(Allocator *allocator) {
 
     excel->allocator = allocator;
     excel->sb = sb;
-    excel->parser = parser_new();
+    excel->parser = parser_new_from_allocator(excel->allocator);
+    excel->lexer  = lexer_new_from_allocator(excel->allocator);
 
     return excel;
 }
@@ -90,18 +92,34 @@ Sheet *excel_add_sheet_from_raw(Excel *excel, char *raw_content) {
                 continue;
             }
 
-
-            if(sv_starts_with(
-                cell_sv, 
-                sv_from_cstr(EXCEL_FORMULA_PREFIX)
-            )) {
-                // FIXME: Parse formula here and set the cell
-                assert(false && "not implemented");
+            TokenList tokens = lexer_lex(excel->lexer, cell_sv);
+            if(lexer_has_error(excel->lexer)) {
+                excel->error = excel->lexer->error;
+                sheet_free(sheet, excel->allocator);
+                return NULL;
             }
 
-            
-            // FIXME: Parse value here and set the cell
-            assert(false && "not implemented");
+            assert(tokens.len >= 1);
+
+            if(tokens.items[0].kind == TOKEN_KIND_EQUAL) {
+                Formula *formula = parser_parse_formula(excel->parser, tokens);
+                if(parser_has_error(excel->parser)) {
+                    assert(formula == NULL);
+                    excel->error = excel->parser->error;
+                    sheet_free(sheet, excel->allocator);
+                    return NULL;
+                }
+                sheet_assign_cell(sheet, row, col, cell_from_formula(formula));
+                continue;
+            }
+
+            Literal literal = parser_parse_literal(excel->parser, tokens);
+            if(parser_has_error(excel->parser)) {
+                excel->error = excel->parser->error;
+                sheet_free(sheet, excel->allocator);
+                return NULL;
+            }
+            sheet_assign_cell(sheet, row, col, cell_from_literal(literal));
         }
     }
 
@@ -110,6 +128,7 @@ Sheet *excel_add_sheet_from_raw(Excel *excel, char *raw_content) {
 }
 
 void excel_free(Excel *excel) {
+    lexer_free(excel->lexer);
     parser_free(excel->parser);
     return allocator_kill(excel->allocator);
 }

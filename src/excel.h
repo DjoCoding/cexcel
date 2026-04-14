@@ -8,16 +8,19 @@
 
 #include "sheet.h"
 #include "parser.h"
+#include "lexer.h"
 
 typedef struct {
     Allocator       *allocator;
     StringBuilder   *sb;
     Parser          *parser;
+    Lexer           *lexer;
     struct {
         Sheet       **items;
         size_t      len;
         size_t      size;
     } sheets;
+    char            *error;
 } Excel;
 
 typedef struct {
@@ -25,8 +28,8 @@ typedef struct {
     size_t cols;
 } ExcelStats;
 
-Excel   *excel_new_from_allocator(Allocator *allocator);
+Excel   *excel_new();
 Sheet   *excel_add_sheet_from_raw(Excel *excel, char *raw_content);
-void    excel_free(Excel *excel);
+void     excel_free(Excel *excel);
 
 #endif // EXCEL_H_
