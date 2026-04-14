@@ -2,7 +2,7 @@
 #include "nob.h"
 
 void cmd_append_flags(Cmd *cmd) {
-    nob_cmd_append(cmd, "-Wall", "-Wextra", "-Werror", "-ggdb2");
+    nob_cmd_append(cmd, "-Wall", "-Wextra", "-Werror", "-ggdb3");
 }
 
 void cmd_append_includes(Cmd *cmd) {

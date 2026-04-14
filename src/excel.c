@@ -128,7 +128,5 @@ Sheet *excel_add_sheet_from_raw(Excel *excel, char *raw_content) {
 }
 
 void excel_free(Excel *excel) {
-    lexer_free(excel->lexer);
-    parser_free(excel->parser);
     return allocator_kill(excel->allocator);
 }

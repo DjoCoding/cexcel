@@ -6,6 +6,12 @@
 
 #include "lexer.h"
 
+// INLINE FUNCTIONS
+inline static void __int__lexer_prepare(Lexer *lexer, StringView sv);
+inline static void __int__lexer_cooldown(Lexer *lexer);
+inline static bool __int__lexer_finished(Lexer *lexer);
+
+
 Lexer *lexer_new_from_allocator(Allocator *allocator) {
     Lexer *lexer = allocator_alloc(allocator, sizeof(*lexer));
     lexer->allocator    = allocator;
@@ -30,7 +36,7 @@ inline static void __int__lexer_cooldown(Lexer *lexer) {
     lexer->cursor       = 0;
 }
 
-bool __int__lexer_finished(Lexer *lexer) {
+inline static bool __int__lexer_finished(Lexer *lexer) {
     assert(lexer->has_content);
     return lexer->cursor >= lexer->content.len;    
 }
@@ -96,10 +102,11 @@ StringView __int__lexer_lex_string_literal(Lexer *lexer) {
     assert(false && "unreachable");
 }
 
-f64 __int__lexer_lex_number(Lexer *lexer) {
+f64 __int__lexer_lex_number(Lexer *lexer, StringView *as_sv) {
     assert(!__int__lexer_finished(lexer));
     assert(isdigit(__int__lexer_peek(lexer)));
 
+    if(as_sv != NULL) as_sv->data    = lexer->content.data;
     f64    value   = 0;
     size_t len     = 0;
 
@@ -115,6 +122,8 @@ f64 __int__lexer_lex_number(Lexer *lexer) {
     }
 
     assert(len >= 1);
+    if(as_sv != NULL)  as_sv->len = len;
+
     return value;
 }
 
@@ -191,6 +200,11 @@ Token __int__lexer_lex_one(Lexer *lexer) {
         return TOKEN_SEMICOLON;
     }
 
+    if(__int__lexer_peek(lexer) == ':') {
+        __int__lexer_advance_one(lexer);
+        return TOKEN_COLON;
+    }
+
     if(__int__lexer_peek(lexer) == '\"') {
         StringView string = __int__lexer_lex_string_literal(lexer);
         if(lexer_has_error(lexer)) return INVALID_TOKEN;
@@ -214,8 +228,9 @@ Token __int__lexer_lex_one(Lexer *lexer) {
     }
 
     if(isdigit(__int__lexer_peek(lexer))) {
-        f64 value = __int__lexer_lex_number(lexer);
-        if(!lexer_has_error(lexer)) return TOKEN_NUMBER_LITERAL(value);
+        StringView as_sv = SV_NULL;
+        f64 value = __int__lexer_lex_number(lexer, &as_sv);
+        if(!lexer_has_error(lexer)) return TOKEN_NUMBER_LITERAL(value, as_sv);
         return INVALID_TOKEN;
     }
 

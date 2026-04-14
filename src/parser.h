@@ -12,6 +12,9 @@
 typedef struct {
     Allocator       *allocator;
     StringBuilder   *sb;
+    TokenList       tokens;
+    size_t          cursor;
+    bool            has_tokens;
     char            *error;
 } Parser;
 

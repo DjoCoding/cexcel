@@ -19,14 +19,18 @@ typedef enum {
     TOKEN_KIND_TIMES,
     TOKEN_KIND_DIV,
     TOKEN_KIND_MOD,
-    TOKEN_KIND_SEMICOLON
+    TOKEN_KIND_SEMICOLON,
+    TOKEN_KIND_COLON,
 } TokenKind;
 
 typedef struct {
     TokenKind kind;
     union {
         StringView  string;
-        f64         number;
+        struct {
+            f64         value;
+            StringView  as_sv;
+        } number;
         bool        boolean;
         StringView  identifier;
     } as;
@@ -50,7 +54,8 @@ typedef struct {
 #define TOKEN_SEMICOLON                 ((Token){.kind=TOKEN_KIND_SEMICOLON})
 #define TOKEN_STRING_LITERAL(s)         ((Token){.kind=TOKEN_KIND_STRING_LITERAL,.as.string=s})
 #define TOKEN_BOOL_LITERAL(b)           ((Token){.kind=TOKEN_KIND_STRING_LITERAL,.as.boolean=b})
-#define TOKEN_NUMBER_LITERAL(v)         ((Token){.kind=TOKEN_KIND_NUMBER_LITERAL,.as.number=v})
+#define TOKEN_NUMBER_LITERAL(v, s)      ((Token){.kind=TOKEN_KIND_NUMBER_LITERAL,.as.number={.value=v,.as_sv=s}})
 #define TOKEN_IDENTIFIER_LITERAL(v)     ((Token){.kind=TOKEN_KIND_IDENTIFIER,.as.identifier=v})
+#define TOKEN_COLON                     ((Token){.kind=TOKEN_KIND_COLON})
 
 #endif // TOKEN_H_
