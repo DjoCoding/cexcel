@@ -117,9 +117,14 @@ int main(int argc, char **argv) {
     }
 
     Excel *excel = excel_new();
-    excel_add_sheet_from_raw(excel, content);
-    excel_free(excel);
 
+    excel_add_sheet_from_raw(excel, content);
+    if(excel_has_error(excel)) {
+        char *error = excel_get_error(excel);
+        fprintf(stderr, "%s\n", error);
+    }
+
+    excel_free(excel);
     allocator_kill(allocator);
     return 0;
 }

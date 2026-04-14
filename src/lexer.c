@@ -89,7 +89,7 @@ StringView __int__lexer_lex_string_literal(Lexer *lexer) {
 
         sb_append_cstr(lexer->sb, "not closed string literal");
         sb_append_cstr(lexer->sb, " ");
-        sb_append(lexer->sb, data, len);
+        sb_append_str(lexer->sb, data, len);
         lexer->error = sb_collect(lexer->sb);
         return SV_NULL;
     }
@@ -245,7 +245,7 @@ Token __int__lexer_lex_one(Lexer *lexer) {
 
     sb_append_cstr(lexer->sb, "invalid token");
     sb_append_cstr(lexer->sb, " ");
-    sb_append(lexer->sb, token_sv.data, token_sv.len);
+    sb_append_str(lexer->sb, token_sv.data, token_sv.len);
     lexer->error = sb_collect(lexer->sb);
 
     return INVALID_TOKEN; 

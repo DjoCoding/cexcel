@@ -107,7 +107,7 @@ Formula *__int__parser_parse_cell_location_as_formula(Parser *parser) {
         sb_append_cstr(parser->sb, "expected column name of cell location but else was found");
         sb_append_cstr(parser->sb, " ");
         sb_append_cstr(parser->sb, "|");
-        sb_append(parser->sb, col_token.as.identifier.data, col_token.as.identifier.len);
+        sb_append_str(parser->sb, col_token.as.identifier.data, col_token.as.identifier.len);
         sb_append_cstr(parser->sb, "|");
         parser->error = sb_collect(parser->sb);
         return NULL;

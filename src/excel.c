@@ -36,7 +36,7 @@ char *__int__excel_preprocess(Excel *excel, char *content) {
         StringView line = sv_trim(sv_split(&sv_content, '\n'));
         if(line.len == 0) continue;
 
-        sb_append(excel->sb, line.data, line.len);
+        sb_append_str(excel->sb, line.data, line.len);
         if(sv_content.len != 0) sb_append_cstr(excel->sb, "\n");
     }
     
@@ -65,6 +65,8 @@ ExcelStats __int__excel_stats(Excel *excel, char *preprocessed) {
 }
 
 Sheet *excel_add_sheet_from_raw(Excel *excel, char *raw_content) {
+    sb_reset(excel->sb);
+
     char *preprocessed = __int__excel_preprocess(excel, raw_content);
     ExcelStats stats   = __int__excel_stats(excel, preprocessed);
     
@@ -94,7 +96,14 @@ Sheet *excel_add_sheet_from_raw(Excel *excel, char *raw_content) {
 
             TokenList tokens = lexer_lex(excel->lexer, cell_sv);
             if(lexer_has_error(excel->lexer)) {
-                excel->error = excel->lexer->error;
+                sb_reset(excel->sb);
+                sb_append_u64(excel->sb, row + 1);
+                sb_append_cstr(excel->sb, ":");
+                sb_append_u64(excel->sb, col + 1);
+                sb_append_cstr(excel->sb, ":");
+                sb_append_cstr(excel->sb, " ");
+                sb_append_cstr(excel->sb, excel->lexer->error);
+                excel->error = sb_collect(excel->sb);
                 sheet_free(sheet, excel->allocator);
                 return NULL;
             }
@@ -105,7 +114,14 @@ Sheet *excel_add_sheet_from_raw(Excel *excel, char *raw_content) {
                 Formula *formula = parser_parse_formula(excel->parser, tokens);
                 if(parser_has_error(excel->parser)) {
                     assert(formula == NULL);
-                    excel->error = excel->parser->error;
+                    sb_reset(excel->sb);
+                    sb_append_u64(excel->sb, row + 1);
+                    sb_append_cstr(excel->sb, ":");
+                    sb_append_u64(excel->sb, col + 1);
+                    sb_append_cstr(excel->sb, ":");
+                    sb_append_cstr(excel->sb, " ");
+                    sb_append_cstr(excel->sb, excel->parser->error);
+                    excel->error = sb_collect(excel->sb);
                     sheet_free(sheet, excel->allocator);
                     return NULL;
                 }
@@ -115,7 +131,14 @@ Sheet *excel_add_sheet_from_raw(Excel *excel, char *raw_content) {
 
             Literal literal = parser_parse_literal(excel->parser, tokens);
             if(parser_has_error(excel->parser)) {
-                excel->error = excel->parser->error;
+                sb_reset(excel->sb);
+                sb_append_u64(excel->sb, row + 1);
+                sb_append_cstr(excel->sb, ":");
+                sb_append_u64(excel->sb, col + 1);
+                sb_append_cstr(excel->sb, ":");
+                sb_append_cstr(excel->sb, " ");
+                sb_append_cstr(excel->sb, excel->parser->error);
+                excel->error = sb_collect(excel->sb);
                 sheet_free(sheet, excel->allocator);
                 return NULL;
             }
@@ -129,4 +152,12 @@ Sheet *excel_add_sheet_from_raw(Excel *excel, char *raw_content) {
 
 void excel_free(Excel *excel) {
     return allocator_kill(excel->allocator);
+}
+
+bool excel_has_error(Excel *excel) {
+    return excel->error != NULL;
+}
+
+char *excel_get_error(Excel *excel) {
+    return excel->error;
 }

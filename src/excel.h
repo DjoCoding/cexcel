@@ -30,6 +30,8 @@ typedef struct {
 
 Excel   *excel_new();
 Sheet   *excel_add_sheet_from_raw(Excel *excel, char *raw_content);
+bool     excel_has_error(Excel *excel);
+char    *excel_get_error(Excel *excel);
 void     excel_free(Excel *excel);
 
 #endif // EXCEL_H_
